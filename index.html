@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Nitor Business card AUR</title>
+<meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0" />
+<meta charset="utf-8"/>
+<style type="text/css">
+* {
+	margin: 0;
+	padding: 0;
+}
+#container {
+	position: absolute;
+	left: 0;
+	top: 0;
+	bottom: 0;
+	right: 0;
+	overflow: hidden;
+}
+</style>
+</head>
+<body>
+<div id="container"></div>
+<script type="text/javascript" src="awe-loader-min.js"></script>
+<script type="text/javascript">
+  function getParameterByName(name) {
+    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+        results = regex.exec(location.search);
+    return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+  }
+	var person = getParameterByName("p");
+	var image = "nitor.png";
+	if (person) {
+		image = person + ".jpg";
+	}
+	var nosupport = '<p><a href="https://www.nitor.fi/"><img src="' + image +
+	  '"/></a></p><p>Try this demo in the latest version of Chrome or ' +
+		'Firefox on a PC or Android device</p>';
+	var reset = setTimeout(function() {
+		document.body.innerHTML = nosupport;
+	}, 10000);
+	var init_awe = function() {
+		awe.setup_scene();
+		window.addEventListener('object_clicked', function(e) {
+			document.location = "https://www.nitor.fi/"
+		}, false);
+		awe.pois.add({ id:'poi_1', position: { x:0, y:0, z:10000 }, visible: false });
+		awe.projections.add({
+			id:'ncube',
+			geometry: { shape: 'plane', width:120, height:120, widthSegments:1, heightSegments: 1 },
+			material:{ type: 'phong', color: 0xFFFFFF },
+			texture: { path: image },
+		}, { poi_id: 'poi_1' });
+		var p = awe.projections.view('ncube');
+		awe.projections.update({
+			data:{
+				rotation:{ y: p.rotation.y, x: p.rotation.x-90 }
+			},
+			where:{ id:'ncube' }
+		});
+
+		awe.events.add([{
+			id: 'ar_tracking_marker',
+			device_types: {
+				pc: 1,
+				android: 1
+			},
+			register: function(handler) {
+				window.addEventListener('ar_tracking_marker', handler, false);
+			},
+			unregister: function(handler) {
+				window.removeEventListener('ar_tracking_marker', handler, false);
+			},
+			handler: function(event) {
+				if (event.detail) {
+					if (event.detail['64']) { // we are mapping marker #64 to this projection
+						awe.pois.update({
+							data: {
+								visible: true,
+								position: { x:0, y:0, z:0 },
+								matrix: event.detail['64'].transform
+							},
+							where: {
+								id: 'poi_1'
+							}
+						});
+					}
+					else {
+						awe.pois.update({
+							data: {
+								visible: false
+							},
+							where: {
+								id: 'poi_1'
+							}
+						});
+					}
+					awe.scene_needs_rendering = 1;
+				}
+			}
+		}]);
+		clearTimeout(reset);
+	};
+  window.addEventListener('load', function() {
+    window.awe.init({
+      device_type: awe.AUTO_DETECT_DEVICE_TYPE,
+      settings: {
+      	container_id: 'container',
+        default_camera_position: { x:0, y:0, z:0 },
+        default_lights:[
+          {
+            id: 'point_light',
+            type: 'point',
+            color: 0xFFFFFF,
+          },
+        ],
+      },
+      ready: function() {
+        awe.util.require([
+          {
+            capabilities: ['gum','webgl'],
+            files: [
+              [ 'awe-standard-dependencies.js', 'awe-standard.js'],
+              'awe-jsartoolkit-dependencies.js', 'awe.marker_ar.js',
+						'awe-standard-object_clicked.js'],
+            success: init_awe,
+          },
+					{
+            capabilities: [],
+            success: function() {
+		          document.body.innerHTML = nosupport;
+            },
+          }
+        ]);
+      }
+    });
+  });
+</script>
+</body>
+</html>
