@@ -16,3 +16,19 @@ Microsoft phones).
 Pushing to this repo triggers a build on https://bob.nitorio.us/jenkins/job/aur-sync/
 which syncs the files to the backing S3 bucket and triggers an invalidation of
 the CloudFront cache.
+
+## Add your own picture ##
+
+You can add your own picture to your business card if you like:
+
+1. Create a jpg image you'd wish to display on top of the AUR marker (square)
+and commit it to this repository (name.jpg)
+2. Create a QR code with the link as above https://aur.nitorio.us/?p=name
+    * One option for this is to use this QR code generator http://research.swtch.com/qr/draw
+    with for example [this image](nitor-bw.png)
+    * It works nicely if you scale the image to match the size of the code and
+    select "Data Pixels Only"
+3. Print the QR code and the AUR marker for example on the back of your business
+card like below
+
+![Business card back](business-card-back.png)
