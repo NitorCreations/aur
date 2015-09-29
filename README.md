@@ -32,4 +32,5 @@ and commit it to this repository (name.jpg)
 card like below
 4. If you want links to your twitter feed or linkedIn profile, add the data
 for those into the persons -variable in the beginning of [index.html](index.html).
+
 ![Business card back](business-card-back.png)
