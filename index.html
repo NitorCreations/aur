@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Nitor Business card AUR</title>
+<title>Nitor Business Card Augmented Reality Demo</title>
 <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0" />
 <meta charset="utf-8"/>
 <style type="text/css">
@@ -34,9 +34,9 @@
 	if (person) {
 		image = person + ".jpg";
 	}
-	var nosupport = '<p><a href="https://www.nitor.fi/"><img src="' + image +
-	  '"/></a></p><p>Try this demo in the latest version of Chrome or ' +
-		'Firefox on a PC or Android device</p>';
+	var nosupport = '<p>Try this demo in the latest version of Chrome or ' +
+	'Firefox on a PC or Android device</p><p><a href="https://www.nitor.fi/">' +
+	'<img src="' + image + '" width="100%"/></a></p>';
 	var reset = setTimeout(function() {
 		document.body.innerHTML = nosupport;
 	}, 6000);
