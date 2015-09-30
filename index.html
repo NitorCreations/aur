@@ -93,10 +93,10 @@
 			var xhttp = new XMLHttpRequest();
 			xhttp.onreadystatechange = function() {
 	  		if (xhttp.readyState == 4 && xhttp.status == 200) {
+					var name = xhttp.responseText;
+					localStorage.setItem(name, "found");
 					var nitoreans = " Nitoreans!";
 					if (localStorage.length == 1) nitoreans = " Nitorean!";
-			  	var name = xhttp.responseText;
-					localStorage.setItem(name, "found");
 					awe.projections.add({
 						id: 'found',
 						geometry: {shape: 'text', text: 'You\'ve found ' +
