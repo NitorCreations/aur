@@ -84,10 +84,43 @@
 			awe.projections.add({
 				id: 'linkedIn',
 				geometry: {shape: 'cube', x: 60, y: 60, z: 60},
-				position: {x: 120, y: 0, z: -60 },
+				position: {x: 120, y: 0, z: -50 },
 				material: {	type: 'phong', color: 0xFFFFFF },
 				texture: { path: 'linkedIn.png' },
 			}, {poi_id: 'poi_1'});
+		}
+		if (window.location.hash) {
+			var xhttp = new XMLHttpRequest();
+			xhttp.onreadystatechange = function() {
+	  		if (xhttp.readyState == 4 && xhttp.status == 200) {
+					var nitoreans = " Nitoreans!";
+					if (localStorage.length == 1) nitoreans = " Nitorean!";
+			  	var name = xhttp.responseText;
+					localStorage.setItem(name, "found");
+					awe.projections.add({
+						id: 'found',
+						geometry: {shape: 'text', text: 'You\'ve found ' +
+							localStorage.length + nitoreans,
+								parameters: {
+									size: 16,
+									height: 1,
+									font: "helvetiker",
+								 	weight: "normal",
+									style: "normal"
+								}
+							},
+						position: {x: -80, y: 0, z: 110 },
+						material: {	type: 'phong', color: 0x50ade5 },
+						rotation:{ x:-90, z: 90 },
+					}, {poi_id: 'poi_1'});
+				}
+		  };
+			var fName = window.location.hash;
+			if (fName.length > 50) {
+				fName = fName.substring(0, 50);
+			}
+			xhttp.open("GET", fName + ".txt", true);
+			xhttp.send();
 		}
 
 		awe.events.add([{
@@ -153,7 +186,7 @@
             files: [
               [ 'awe-standard-dependencies.js', 'awe-standard.js'],
               'awe-jsartoolkit-dependencies.js', 'awe.marker_ar.js',
-						'awe-standard-object_clicked.js'],
+						'awe-standard-object_clicked.js', 'helvetiker_regular.typeface.js'],
             success: init_awe,
           },
 					{
