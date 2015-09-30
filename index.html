@@ -115,7 +115,7 @@
 					}, {poi_id: 'poi_1'});
 				}
 		  };
-			var fName = window.location.hash;
+			var fName = window.location.hash.substring(1);
 			if (fName.length > 50) {
 				fName = fName.substring(0, 50);
 			}
