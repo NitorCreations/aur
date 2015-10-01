@@ -37,7 +37,7 @@
 	};
 	//                  1,  2,  3,  4,  5,  6,  7
 	var levels =      [  0,  3,  8, 16, 29, 50, 84, 184];
-	var percentages = [ 33, 20, 13,  8,  5,  3,  1];
+	var percentages = [ 33.33, 20.0, 12.5,  7.69,  4.76,  2.94,  1.0];
   function getParameterByName(name) {
     name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
     var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
@@ -111,6 +111,7 @@
 					}
 					var overLevel = found - levels[level];
 					var achievement = overLevel * percentages[level];
+					var missing = 100 - achievement;
 					if (found == 1) nitoreans = " Nitorean!";
 					awe.projections.add({
 						id: 'found',
@@ -151,8 +152,8 @@
 							height: achievement,
 							openEnded: false
 						},
-						position: {x: -90, y: 0, z: 0 },
-						material: {	type: 'phong', color: 0x00FF00 },
+						position: {x: -90, y: 0, z: 30 -  (achievement / 2)},
+						material: {	type: 'phong', color: 0x50ade5 },
 						rotation:{ z: -90, y: 90 },
 					}, {poi_id: 'poi_1'});
 					awe.projections.add({
@@ -163,8 +164,8 @@
 							height: 100 - achievement,
 							openEnded: false
 						},
-						position: {x: -90, y: 0, z: - ((achievement / 2) + (100 - achievement)/2) },
-						material: {	type: 'phong', color: 0xFF0000 },
+						position: {x: -90, y: 0, z: 30 - achievement - (missing/2) },
+						material: {	type: 'phong', color: 0x4f4c4c },
 						rotation:{ z: -90, y: 90 },
 					}, {poi_id: 'poi_1'});
 				}
