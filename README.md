@@ -33,8 +33,8 @@ and commit it to this repository [name].jpg
 1. Create and commit a file: [50 first characters from your QR url hash].txt with your full name in it (examples in the repo)
 1. Print the QR code and the AUR marker for example on the back of your business
 card like below
-1. Add links to your LinkedIn and/or twitter handle into [persons.json](persons.json).
-for those into the persons -variable in the beginning of [index.html](index.html).
+1. Add links to your LinkedIn and/or twitter handle into [persons.json](persons.json) and commit that.
+1. Push and yuo're done :)
 
 
 ![Business card back](business-card-back.png)
