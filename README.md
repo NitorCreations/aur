@@ -23,14 +23,18 @@ You can add your own picture to your business card if you like:
 
 1. Create a jpg image you'd wish to display on top of the AUR marker (square)
 and commit it to this repository (name.jpg)
-2. Create a QR code with the link as above https://aur.nitorio.us/?p=name
+1. Create a QR code with the link as above https://aur.nitorio.us/?p=name
     * One option for this is to use this QR code generator http://research.swtch.com/qr/draw
     with for example [this image](nitor-bw.png)
     * It works nicely if you scale the image to match the size of the code and
     select "Data Pixels Only"
-3. Print the QR code and the AUR marker for example on the back of your business
+    * This works so that the url ends up being https://aur.nitorio.us/?p=name#(really long string of digits to make the image what you want)
+    * However you generate your QR the url needs to have a hard-to-guess hash part (examples in the repo)
+1. Create file [50 first characters from your QR url hash].txt with your full name in it
+1. Print the QR code and the AUR marker for example on the back of your business
 card like below
-4. If you want links to your twitter feed or linkedIn profile, add the data
+1. If you want links to your twitter feed or linkedIn profile, add the data
 for those into the persons -variable in the beginning of [index.html](index.html).
+
 
 ![Business card back](business-card-back.png)
