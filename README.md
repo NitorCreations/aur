@@ -29,11 +29,11 @@ and commit it to this repository [name].jpg
     * It works nicely if you scale the image to match the size of the code and
     select "Data Pixels Only"
     * This works so that the url ends up being https://aur.nitorio.us/?p=name#[really long string of digits to make the image what you want]
-    * However you generate your QR the url needs to have a hard-to-guess hash part 
+    * However you generate your QR, the url needs to have a hard-to-guess hash part
 1. Create and commit a file: [50 first characters from your QR url hash].txt with your full name in it (examples in the repo)
 1. Print the QR code and the AUR marker for example on the back of your business
 card like below
-1. If you want links to your twitter feed or linkedIn profile, add the data
+1. Add links to your LinkedIn and/or twitter handle into [persons.json](persons.json).
 for those into the persons -variable in the beginning of [index.html](index.html).
 
 

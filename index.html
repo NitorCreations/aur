@@ -23,18 +23,6 @@
 <div id="container"></div>
 <script type="text/javascript" src="awe-loader-min.js"></script>
 <script type="text/javascript">
-  var persons = {
-		pasi: {
-			twitter: "psiniemi",
-			linkedIn: "https://fi.linkedin.com/in/psiniemi"
-		},
-		lasse: {
-			linkedIn: "https://fi.linkedin.com/pub/lasse-lilja/0/36/319"
-		},
-		eki: {
-			linkedIn: "https://fi.linkedin.com/in/epulliai"
-		}
-	};
 	//                  1,  2,  3,  4,  5,  6,  7
 	var levels =      [  0,  3,  8, 16, 29, 50, 84, 184];
 	var percentages = [ 33.33, 20.0, 12.5,  7.69,  4.76,  2.94,  1.0];
@@ -48,6 +36,8 @@
 	var image = "nitor.png";
 	if (person) {
 		image = person + ".jpg";
+	} else {
+		person = "none";
 	}
 	var nosupport = '<p>Try this demo in the latest version of Chrome or ' +
 	'Firefox on a PC or Android device</p><p><a href="https://www.nitor.fi/">' +
@@ -64,6 +54,11 @@
 				document.location = "https://twitter.com/" + persons[person].twitter
 			} else if (e.detail.projection_id === 'linkedIn') {
 				document.location = persons[person].linkedIn
+			} else if (e.detail.projection_id === 'found' ||
+				e.detail.projection_id === 'level' ||
+				e.detail.projection_id === 'achievementBar' ||
+				e.detail.projection_id === 'missingBar') {
+					document.location.href = 'found.html';
 			}
 		}, false);
 		awe.pois.add({ id:'poi_1', position: { x:0, y:0, z:10000 }, visible: false });
@@ -74,30 +69,40 @@
 			rotation:{ x:-90 },
 			texture: { path: image },
 		}, { poi_id: 'poi_1' });
-		if (persons[person].twitter) {
-			awe.projections.add({
-				id: 'twitter',
-				geometry: {shape: 'cube', x: 60, y: 60, z: 60},
-				position: {x: 120, y: 0, z: 60 },
-				material: {	type: 'phong', color: 0xFFFFFF },
-				texture: { path: 'twitter.png' },
-			}, {poi_id: 'poi_1'});
-		}
-		if (persons[person].linkedIn) {
-			awe.projections.add({
-				id: 'linkedIn',
-				geometry: {shape: 'cube', x: 60, y: 60, z: 60},
-				position: {x: 120, y: 0, z: -50 },
-				material: {	type: 'phong', color: 0xFFFFFF },
-				texture: { path: 'linkedIn.png' },
-			}, {poi_id: 'poi_1'});
+		if (person != 'none') {
+			var personXhttp = new XMLHttpRequest();
+			personXhttp.onreadystatechange = function() {
+				if (personXhttp.readyState == 4 && personXhttp.status == 200) {
+					var persons = JSON.parse(personXhttp.responseText);
+					if (persons[person].twitter) {
+						awe.projections.add({
+							id: 'twitter',
+							geometry: {shape: 'cube', x: 60, y: 60, z: 60},
+							position: {x: 120, y: 0, z: 60 },
+							material: {	type: 'phong', color: 0xFFFFFF },
+							texture: { path: 'twitter.png' },
+						}, {poi_id: 'poi_1'});
+					}
+					if (persons[person].linkedIn) {
+						awe.projections.add({
+							id: 'linkedIn',
+							geometry: {shape: 'cube', x: 60, y: 60, z: 60},
+							position: {x: 120, y: 0, z: -50 },
+							material: {	type: 'phong', color: 0xFFFFFF },
+							texture: { path: 'linkedIn.png' },
+						}, {poi_id: 'poi_1'});
+					}
+				}
+			}
+			personXhttp.open("GET", "persons.json", true);
+			personXhttp.send();
 		}
 		if (window.location.hash) {
 			var xhttp = new XMLHttpRequest();
 			xhttp.onreadystatechange = function() {
 	  		if (xhttp.readyState == 4 && xhttp.status == 200) {
 					var name = xhttp.responseText;
-					localStorage.setItem(name, "found");
+					localStorage.setItem(name, person);
 					var nitoreans = " Nitoreans!";
 					var found = localStorage.length;
 					var level = 0;
@@ -241,7 +246,8 @@
             files: [
               [ 'awe-standard-dependencies.js', 'awe-standard.js'],
               'awe-jsartoolkit-dependencies.js', 'awe.marker_ar.js',
-						'awe-standard-object_clicked.js', 'helvetiker_regular.typeface.js'],
+							'awe-standard-window_resized.js',	'awe-standard-object_clicked.js',
+							'helvetiker_regular.typeface.js'],
             success: init_awe,
           },
 					{

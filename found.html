@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Nitor Business Card Augmented Reality Demo</title>
+<link href='http://fonts.googleapis.com/css?family=Lato&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
+<style type="text/css">
+h1 {
+    color: #618291;
+    font-family: 'Lato', sans-serif;
+    font-weight: 900;
+    font-size: 4em
+}
+li {
+  font-family: 'Lato', sans-serif;
+  font-size: 2em
+}
+a:link {
+    color: #50ade5;
+}
+a:visited {
+    color: #618291;
+}
+</style>
+<meta charset="utf-8"/>
+</head>
+<body>
+  <h1>You have found</h1>
+
+<script type="text/javascript">
+  var personXhttp = new XMLHttpRequest();
+  document.body.innerHTML += '<ul>'
+  personXhttp.onreadystatechange = function() {
+    if (personXhttp.readyState == 4 && personXhttp.status == 200) {
+      var persons = JSON.parse(personXhttp.responseText);
+      for (i=0; i<localStorage.length;i++) {
+        var person = localStorage.getItem(localStorage.key(i));
+        var name = localStorage.key(i);
+        if (persons[person] && persons[person].linkedIn) {
+          document.body.innerHTML += '<li><a href="' + persons[person].linkedIn +
+            '"/>' + name + '</a></li>';
+        } else if (persons[person] && persons[person].twitter) {
+          document.body.innerHTML += '<li><a href="https://twitter.com/' +
+            persons[person].twitter +'"/>' + name + '</a></li>';
+        } else {
+          document.body.innerHTML += '<li>' + name + '</li>';
+        }
+      }
+      document.body.innerHTML += '</ul>'
+    }
+  }
+  personXhttp.open("GET", "persons.json", true);
+  personXhttp.send();
+</script>
+</body>
+<html>

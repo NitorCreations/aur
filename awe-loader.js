@@ -1388,7 +1388,7 @@ function awe_v8() {
     else if (navigator.webkitGetUserMedia) { // early webkit webrtc implementation
       _get_user_media = navigator.webkitGetUserMedia.bind(navigator);
       _connect_stream_to_src = function(media_stream, media_element) {
-        media_element.src = webkitURL.createObjectURL(media_stream);
+        media_element.src = URL.createObjectURL(media_stream);
         media_element.play();
       };
     }
