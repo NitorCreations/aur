@@ -35,6 +35,9 @@
 			linkedIn: "https://fi.linkedin.com/in/epulliai"
 		}
 	};
+	//                  1,  2,  3,  4,  5,  6,  7
+	var levels =      [  0,  3,  8, 16, 29, 50, 84, 184];
+	var percentages = [ 33, 20, 13,  8,  5,  3,  1];
   function getParameterByName(name) {
     name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
     var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
@@ -96,7 +99,19 @@
 					var name = xhttp.responseText;
 					localStorage.setItem(name, "found");
 					var nitoreans = " Nitoreans!";
-					if (localStorage.length == 1) nitoreans = " Nitorean!";
+					var found = localStorage.length;
+					var level = 0;
+					var i;
+					for (i=0; i<levels.length; i++) {
+						if (found >= levels[i]) {
+							level = i;
+						} else {
+							break;
+						}
+					}
+					var overLevel = found - levels[level];
+					var achievement = overLevel * percentages[level];
+					if (found == 1) nitoreans = " Nitorean!";
 					awe.projections.add({
 						id: 'found',
 						geometry: {shape: 'text', text: 'You\'ve found ' +
@@ -109,9 +124,48 @@
 									style: "normal"
 								}
 							},
+						position: {x: -110, y: 0, z: 110 },
+						material: {	type: 'phong', color: 0x50ade5 },
+						rotation:{ x:-90, z: 90 },
+					}, {poi_id: 'poi_1'});
+					awe.projections.add({
+						id: 'level',
+						geometry: {shape: 'text', text: 'Level: ' + (level + 1),
+								parameters: {
+									size: 14,
+									height: 1,
+									font: "helvetiker",
+								 	weight: "normal",
+									style: "normal"
+								}
+							},
 						position: {x: -80, y: 0, z: 110 },
 						material: {	type: 'phong', color: 0x50ade5 },
 						rotation:{ x:-90, z: 90 },
+					}, {poi_id: 'poi_1'});
+					awe.projections.add({
+						id: 'achievementBar',
+						geometry: {shape: 'cylinder',
+							radiusTop: 10,
+							radiusBottom: 10,
+							height: achievement,
+							openEnded: false
+						},
+						position: {x: -90, y: 0, z: 0 },
+						material: {	type: 'phong', color: 0x00FF00 },
+						rotation:{ z: -90, y: 90 },
+					}, {poi_id: 'poi_1'});
+					awe.projections.add({
+						id: 'missingBar',
+						geometry: {shape: 'cylinder',
+							radiusTop: 10,
+							radiusBottom: 10,
+							height: 100 - achievement,
+							openEnded: false
+						},
+						position: {x: -90, y: 0, z: - ((achievement / 2) + (100 - achievement)/2) },
+						material: {	type: 'phong', color: 0xFF0000 },
+						rotation:{ z: -90, y: 90 },
 					}, {poi_id: 'poi_1'});
 				}
 		  };
