@@ -349,6 +349,7 @@
 
       BODY.value = pov;
       this_awe.scene().add(pov);
+      THREE.Object3D._threexDomEvent.camera(pov);
       this_awe.scene_needs_rendering = 1;
 
       return this.constructor.prototype.add.call(this, BODY, HEAD); // super
