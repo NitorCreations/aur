@@ -5,6 +5,8 @@ to some business cards. The code is hosted at https://aur.nitorio.us/
 and some business cards have a QR code with the link with the form
 https://aur.nitorio.us/?p=name#unique-hash .
 
+The demo in action: https://www.youtube.com/watch?v=KbiZRK0hUfk
+
 The code is a fork of the marker_ar example from https://github.com/buildar/awe.js .
 The initial implementation paints a plane on top of the AUR marker with the
 picture matching the 'p' query parameter as the texture.
