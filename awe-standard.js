@@ -351,6 +351,9 @@
       this_awe.scene().add(pov);
       this_awe.scene_needs_rendering = 1;
 
+      var event = new CustomEvent('pov_added', { detail: BODY.id });
+      window.dispatchEvent(event);
+
       return this.constructor.prototype.add.call(this, BODY, HEAD); // super
     }
 

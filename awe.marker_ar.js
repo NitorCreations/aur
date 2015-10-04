@@ -5,7 +5,7 @@
   var video = document.createElement('video');
   var last_time = 0;
   var tracking_enabled = false, background_video, canvas, ctx, video_stream, detector, raster, param, resultMat, tmp = new Float32Array(16), pov_projection_matrix, pov_projection_matrix2;
-  
+
   function resize_video() { // jsartoolkit specific resize function
     if (awe.device_type() == 'android' && navigator.userAgent.match(/firefox/i)) {
       // NOTE: This is borken - not quite sure what firefox is doing here 8/
@@ -28,7 +28,7 @@
       awe.renderer().domElement.style.left = '0px';
       awe.pov().aspect = aspect_ratio;
     }
-    else {  
+    else {
       var aspect_ratio = width / height,
         h, w;
       if (window.innerHeight > window.innerWidth) {
@@ -56,7 +56,7 @@
     }
     awe.scene_needs_rendering = 1;
   }
-  
+
   THREE.Matrix4.prototype.setFromArray = function(m){
     return this.set(
       m[0],m[4],m[8],m[12],
@@ -84,7 +84,7 @@
     dst[14] = src.m23;
     dst[15] = 1;
   }
-  
+
   function add_ar_events(){
     awe.events.add([{
       id: 'video_stream',
@@ -99,6 +99,10 @@
         window.removeEventListener('gum_ready', handler, false);
       },
       handler: function(e) {
+        if (!awe.pov()) {
+          window.addEventListener('pov_added', handler, false);
+          return;
+        }
         canvas = document.createElement('canvas');
         canvas.id = "ar_canvas";
         canvas.width = width/2;
@@ -183,7 +187,7 @@
           };
         }
         var event = new CustomEvent('ar_tracking_marker', { detail: event_data });
-        window.dispatchEvent(event);  
+        window.dispatchEvent(event);
       }
     },
     {
@@ -203,13 +207,13 @@
       }
     }]);
   }
-  
+
   function remove_ar_events(){
     awe.events.delete('ar_tracking');
     awe.events.delete('video_stream');
     awe.events.delete('resize_screen');
   }
-  
+
   awe.plugins.add([{
     id: 'jsartoolkit',
     auto_register: true,
