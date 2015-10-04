@@ -4,10 +4,14 @@
 <title>Nitor Business Card Augmented Reality Demo</title>
 <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0" />
 <meta charset="utf-8"/>
+<link href='http://fonts.googleapis.com/css?family=Lato&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
 <style type="text/css">
 * {
 	margin: 0;
 	padding: 0;
+	font-weight: 900;
+  font-family: 'Lato', sans-serif;
+	font-size: 32px
 }
 #container {
 	position: absolute;
@@ -39,9 +43,10 @@
 	} else {
 		person = "none";
 	}
-	var nosupport = '<p>Try this demo in the latest version of Chrome or ' +
-	'Firefox on a PC or Android device</p><p><a href="https://www.nitor.fi/">' +
-	'<img src="' + image + '" width="100%"/></a></p>';
+	var nosupport = '<p style="padding: 30; text-align: center">Try this demo ' +
+	'in the latest version of Chrome or	Firefox on a PC or Android device</p>' +
+	'<p><a href="https://www.nitor.fi/"><img src="' + image + '" width="50%" ' +
+	'style="padding-left: 25%;padding-right: 25%"/></a></p>';
 	var reset = setTimeout(function() {
 		document.body.innerHTML = nosupport;
 	}, 6000);
