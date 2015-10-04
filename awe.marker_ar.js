@@ -100,7 +100,7 @@
       },
       handler: function(e) {
         if (!awe.pov()) {
-          window.addEventListener('pov_added', handler, false);
+          window.addEventListener('pov_added', arguments.callee, false);
           return;
         }
         canvas = document.createElement('canvas');
