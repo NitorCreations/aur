@@ -618,13 +618,12 @@
               _clickable_objects.push(BODY.mesh);
               this_awe.projections.update({ data:{ _clickable_object_id:_clickable_id }, where:{ id:BODY.id } });
               this_awe.scene_needs_rendering = 1;
-              this_awe.scene_needs_rendering = 1;
               var event = new CustomEvent('projection_loaded', { detail: BODY.id });
               window.dispatchEvent(event);
             });
           }
           else {
-            loader = new THREE.OBJLoader();
+            loader = new THREE.JSONLoader();
             var texture;
             if (BODY.texture.path) {
               if (BODY.geometry.x) { 
@@ -640,7 +639,13 @@
               var texture_id = this_awe.textures.add();
               texture = this_awe.textures.view(texture_id);
             }
-            loader.load(BODY.geometry.path, function (mesh) {
+            loader.load(BODY.geometry.path, function (geometry) {
+              // need to make the mesh ourselves, loader gives you just geometry
+              mesh = new THREE.Mesh( geometry );
+
+              // TODO: this makes OUR models correct size, but generally mesh props should be set outside and updated by _update_mesh_io
+              mesh.scale.set( 150, 150, 150 );
+
               mesh.traverse(function (child) {
                 if ( child instanceof THREE.Mesh ) {
                   child.material.map = texture;
@@ -864,7 +869,7 @@
           texture.cc = cc;
         }
         else {
-          texture = THREE.ImageUtils.loadTexture(BODY.path, undefined, function() {
+          texture = (new THREE.TextureLoader).load(BODY.path, undefined, function() {
             this_awe.scene_needs_rendering = 1;
           });
         }
