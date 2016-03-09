@@ -39,7 +39,7 @@
 	var person = utils.getParameterByName("p");
 	var image = "nitor.png";
 	if (person) {
-		image = person + ".jpg";
+		image = "models/" + person + ".jpg";
 	} else {
 		person = "none";
 	}
@@ -49,6 +49,7 @@
 	'style="padding-left: 25%;padding-right: 25%"/></a></p>';
 	var reset = setTimeout(function() {
 		document.body.innerHTML = nosupport;
+		// TODO: 6s is too short for loading models over network
 	}, 6000);
 	var init_awe = function() {
 		awe.setup_scene();
@@ -69,10 +70,12 @@
 		awe.pois.add({ id:'poi_1', position: { x:0, y:0, z:10000 }, visible: false });
 		awe.projections.add({
 			id:'personImage',
-			geometry: { shape: 'plane', width:120, height:120 },
-			material:{ type: 'phong', color: 0xFFFFFF },
+			// geometry: { shape: 'plane', width:120, height:120 },
+			// material: { type: 'phong', color: 0xFFFFFF },
+			// texture: { path: image },
+			geometry: { path: './models/' + person + '_mesh.js' },
+			texture: { path: './models/' + person + '_texture.jpg' },
 			rotation:{ x:-90 },
-			texture: { path: image },
 		}, { poi_id: 'poi_1' });
 		if (person != 'none') {
 			var personXhttp = new XMLHttpRequest();
@@ -249,10 +252,15 @@
           {
             capabilities: ['gum','webgl'],
             files: [
-              [ 'awe-standard-dependencies.js', 'awe-standard.js'],
-              'awe-jsartoolkit-dependencies.js', 'awe.marker_ar.js',
-							'awe-standard-window_resized.js',	'awe-standard-object_clicked.js',
-							'helvetiker_regular.typeface.js'],
+             	[
+             		'awe-standard-dependencies.js',
+             		'awe-standard.js'
+             	],
+            	'awe-jsartoolkit-dependencies.js',
+            	'awe.marker_ar.js',
+				'awe-standard-window_resized.js',
+				'awe-standard-object_clicked.js'
+			],
             success: init_awe,
           },
 					{
