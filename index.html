@@ -25,6 +25,7 @@
 </head>
 <body>
 <div id="container"></div>
+<script src="utils.js"></script>
 <script src="node_modules/three/three.min.js"></script>
 <script src="node_modules/three/src/loaders/JSONLoader.js"></script>
 <script src="node_modules/three/examples/js/loaders/OBJLoader.js"></script>
@@ -35,13 +36,7 @@
 	//                  1,  2,  3,  4,  5,  6,  7
 	var levels =      [  0,  3,  8, 16, 29, 50, 84, 184];
 	var percentages = [ 33.33, 20.0, 12.5,  7.69,  4.76,  2.94,  1.0];
-  function getParameterByName(name) {
-    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
-    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
-        results = regex.exec(location.search);
-    return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
-  }
-	var person = getParameterByName("p");
+	var person = utils.getParameterByName("p");
 	var image = "nitor.png";
 	if (person) {
 		image = person + ".jpg";
