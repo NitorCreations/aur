@@ -38,7 +38,7 @@
       if (this_awe.settings.view('renderer')) {
         if (this_awe.capabilities.view("webgl") && this_awe.settings.view('renderer') == 'webgl') {
           var antialias = this_awe.settings.view('antialias') || true;
-          var renderer = new THREE.WebGLRenderer({ antialias: antialias });
+          var renderer = new THREE.WebGLRenderer({ antialias: antialias, alpha: true });
           var shadows = this_awe.settings.view('shadows') || false;
           // spotlight is required to add shadows!
           // see https://github.com/mrdoob/three.js/issues/748
