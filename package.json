@@ -1,0 +1,23 @@
+{
+  "name": "aur",
+  "version": "0.0.1",
+  "description": "Nitor Business Card Augmented Reality Demo",
+  "main": "index.html",
+  "dependencies": {
+    "three": "^0.74.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NitorCreations/aur.git"
+  },
+  "author": "Pasi Niemi <pasi.niemi@nitor.fi>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/NitorCreations/aur/issues"
+  },
+  "homepage": "https://github.com/NitorCreations/aur#readme"
+}
