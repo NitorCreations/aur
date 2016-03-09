@@ -203,29 +203,29 @@
                 video.style.left = '-999em';
                 video.style.height = '100%';
                 video.style.width = '100%';
-                
+
                 BODY.stream = stream;
                 self.constructor.prototype.update.call(this, {data: {stream: stream}, where: {id: BODY.id}}, HEAD); // super
                 this_awe.util.connect_stream_to_src(stream, video);
-                
+
                 var event = new CustomEvent('gum_ready');
                 window.dispatchEvent(event);
-              }, 
+              },
               function(e) {
                 var event = new CustomEvent('gum_error');
                 window.dispatchEvent(event);
               }
             );
           }
-          
+
           if (window.MediaStreamTrack && window.MediaStreamTrack.getSources) {
-            MediaStreamTrack.getSources(function(source_infos) {
+            navigator.mediaDevices.enumerateDevices().then(function(source_infos) {
               var selected_source = null;
               for (var i = 0; i != source_infos.length; ++i) {
                 var source_info = source_infos[i];
-                if (source_info.kind === 'video') {
+                if (source_info.kind === 'videoinput') {
                   if (!selected_source || (source_info.facing && source_info.facing == "environment")) {
-                    selected_source = source_info.id;
+                    selected_source = source_info.deviceId;
                   }
                 }
               }
