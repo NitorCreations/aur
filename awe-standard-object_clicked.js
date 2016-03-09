@@ -22,7 +22,7 @@
               mouse.x = (e.clientX/window.innerWidth) * 2 - 1;
               mouse.y = -(e.clientY/window.innerHeight) * 2 + 1;
               var mouse_vector = new THREE.Vector3(mouse.x, mouse.y, 1);
-              projector.unprojectVector(mouse_vector, camera); 
+              mouse_vector.unproject(camera);
               var direction = mouse_vector.sub(camera.position).normalize();
               ray.set(camera.position, direction);
               var intersects = ray.intersectObjects(awe.projections.list({ type:'clickable' }), true);
