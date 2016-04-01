@@ -23,8 +23,7 @@ the CloudFront cache.
 
 If you are a Nitorean, you can add your own picture to your business card if you like:
 
-1. Create a jpg image you'd wish to display on top of the AUR marker (square)
-and commit it to this repository [name].jpg
+1. Create a jpg image / 3D mesh you'd wish to display on top of the AUR marker (square) and configure your persona in [persons.json](https://github.com/NitorCreations/aur/blob/master/persons.json); commit both to this repository.
 1. Create a QR code with the link as above https://aur.nitorio.us/?p=name#unique-hash
     * One option for this is to use this QR code generator http://research.swtch.com/qr/draw
     with for example [this image](nitor-bw.png)
