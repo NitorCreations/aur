@@ -190,7 +190,7 @@
             };
             if (video_source_id) {
               options.video = {
-                optional: [{ facingMode: "environment" }, {sourceId: video_source_id}]
+                optional: [{ facingMode: "environment" }, {sourceId: video_source_id.deviceId}]
               };
             }
             this_awe.util.get_user_media(options, 
