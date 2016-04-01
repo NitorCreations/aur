@@ -221,14 +221,18 @@
           if (window.MediaStreamTrack && window.MediaStreamTrack.getSources) {
             navigator.mediaDevices.enumerateDevices().then(function(source_infos) {
               var selected_source = null;
-              for (var i = 0; i != source_infos.length; ++i) {
-                var source_info = source_infos[i];
-                if (source_info.kind === 'videoinput') {
-                  if (!selected_source || (source_info.facing && source_info.facing == "environment")) {
-                    selected_source = source_info.deviceId;
-                  }
-                }
+              var video_sources;
+
+              if (source_infos && source_infos.length) {
+                video_sources = source_infos.filter(function (device) {
+                  return device.kind === 'videoinput';
+                });
               }
+
+              selected_source = video_sources.find(function (source) {
+                return source.label.indexOf('back') > -1 || (source.facing && source.facing == "environment");
+              }) || video_sources[0];
+
               go(selected_source);
             });
           }
