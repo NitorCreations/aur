@@ -2,16 +2,17 @@
   "pasi": {
     "twitter":  "psiniemi",
     "linkedIn": "https://fi.linkedin.com/in/psiniemi",
-    "mesh":     "./models/pasi_mesh.js",
-    "texture":  "./models/pasi_texture.jpg",
-    "image":    "./models/pasi.jpg"
+    "mesh":     "/models/pasi_mesh.js",
+    "mesh_obj": "/models/pasi_mesh.obj",
+    "texture":  "/models/pasi_texture.jpg",
+    "image":    "/models/pasi.jpg"
   },
   "lasse": {
     "linkedIn": "https://fi.linkedin.com/pub/lasse-lilja/0/36/319",
-    "image":    "./models/lasse.jpg"
+    "image":    "/models/lasse.jpg"
   },
   "eki": {
     "linkedIn": "https://fi.linkedin.com/in/epulliai",
-    "image":    "./models/eki.jpg"
+    "image":    "/models/eki.jpg"
   }
 }
