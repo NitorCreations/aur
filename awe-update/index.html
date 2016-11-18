@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Nitor Business Card Augmented Reality Demo</title>
+<meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0" />
+<meta charset="utf-8"/>
+<style type="text/css">
+* {
+  margin: 0;
+  padding: 0;
+}
+#container {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  overflow: hidden;
+}
+</style>
+</head>
+<body>
+<div id="container"></div>
+<script src="/utils.js"></script>
+<script type="text/javascript" src="/node_modules/awe.js/js/awe-v8.js"></script>
+<script type="text/javascript" src="/node_modules/awe.js/js/awe-loader.js"></script>
+<script type="text/javascript">
+  var personParam = utils.getParameterByName("p");
+  var persons;
+
+  // setup and paint the scene
+  var setupScene = function() {
+    awe.setup_scene();
+
+    var click_plugin = awe.plugins.view('object_clicked');
+    if (click_plugin) {
+      click_plugin.register();
+      click_plugin.enable();
+    }
+
+    awe.settings.update({data:{value: 'ar'}, where:{id: 'view_mode'}})
+    var render_effects_plugin = awe.plugins.view('render_effects');
+    if (render_effects_plugin) {
+      render_effects_plugin.enable();
+    }
+
+    awe.pois.add({
+      id:'masterPoi',
+      position: { x:0, y:0, z:0 },
+      visible: false
+    });
+
+    awe.pois.add({
+      id:'jsartoolkit_marker_64',
+      position: { x:0, y:0, z:0 },
+      visible: false
+    });
+
+    var person = persons[personParam] || { image: '/nitor.png' };
+
+    if (person.mesh_obj && person.texture) {
+      createPersonMesh(person)
+    } else {
+      createPersonImage(person)
+    }
+
+    /**
+     * TODO: this is not needed for basic marker tracking, awe.js
+     * now does it for us. But we still need to listen to the event
+     * and apply it's tranformation to another projections / pois in
+     * the scene.
+     * Unfortunately this doesn't seem to work at the moment, see:
+     * https://github.com/awe-media/awe.js/issues/5
+     */
+    // var trackingHandler = utils.debounce(function(event) {
+    //   window.requestAnimationFrame(function() {
+    //     if (!event.detail) { return }
+
+    //     var marker = event.detail['64']
+
+    //     if (marker) {
+    //       awe.pois.update({
+    //         data: {
+    //           visible: true,
+    //           matrix: marker.transform,
+    //         },
+    //         where: { id: 'masterPoi' }
+    //       });
+    //     }
+    //     else {
+    //       awe.pois.update({
+    //         data: {
+    //           visible: false
+    //         },
+    //         where: { id: 'masterPoi' }
+    //       });
+    //     }
+
+    //     awe.scene_needs_rendering = 1;
+    //   })
+    // }, 1, true)
+
+    // awe.events.add([{
+    //   id: 'ar_tracking_marker',
+    //   device_types: awe.AUTO_DETECT_DEVICE_TYPE,
+    //   register: function(handler) {
+    //     window.addEventListener('ar_tracking_marker', handler, false);
+    //   },
+    //   unregister: function(handler) {
+    //     window.removeEventListener('ar_tracking_marker', handler, false);
+    //   },
+    //   handler: trackingHandler
+    // }]);
+
+    awe.plugins.view('jsartoolkit').enable();
+  }
+
+  var createPersonMesh = function(person) {
+    var projection = {
+      id: 'person',
+      geometry: {
+        path: person.mesh_obj,
+      },
+      rotation: {
+        x:180, y:0, z:0
+      },
+      texture: {
+        path: person.texture
+      }
+    };
+
+    awe.projections.add(
+      projection,
+      { poi_id: 'jsartoolkit_marker_64' }
+    );
+  }
+
+  var createPersonImage = function(person) {
+    var projection = {
+      id: 'person',
+      geometry: {
+        shape: 'plane',
+        width: 50,
+        height: 50
+      },
+      position: {
+        z: -200 // no idea why this is
+      },
+      material: {
+        type: 'phong',
+        color: 'white'
+      },
+      texture: {
+        path: person.image
+      }
+    };
+
+    awe.projections.add(
+      projection,
+      { id: 'jsartoolkit_marker_64' }
+    );
+  }
+
+  var initAwe = function() {
+    window.awe.init({
+      device_type: awe.AUTO_DETECT_DEVICE_TYPE,
+      settings: {
+        container_id: 'container',
+        fps: 24,
+        default_camera_position: { x:0, y:0, z:0 },
+        default_lights:[{
+          id: 'hemisphere_light',
+          type: 'hemisphere',
+          color: 0xCCCCCC
+        }],
+      },
+      ready: function() {
+        var d = '?_='+Date.now();
+
+        awe.util.require([
+          {
+            capabilities: ['webgl','gum'],
+            files: [
+              [ '/node_modules/awe.js/js/awe-standard-dependencies.js'+d, '/node_modules/awe.js/js/awe-standard.js'+d ], // core dependencies for this app
+              ['/node_modules/awe.js/js/plugins/StereoEffect.js'+d, '/node_modules/awe.js/js/plugins/VREffect.js'+d], // dependencies for render effects
+              '/node_modules/awe.js/js/plugins/awe.rendering_effects.js'+d,
+              '/node_modules/awe.js/js/plugins/awe-standard-object_clicked_or_focused.js'+d, // object click/tap handling plugin
+              '/node_modules/awe.js/examples/basic/awe.mouse.js'+d, // basic mouse handling
+              '/node_modules/awe.js/examples/marker_ar/awe-jsartoolkit-dependencies.js',
+              '/node_modules/awe.js/examples/marker_ar/awe.marker_ar.js',
+            ],
+            success: setupScene,
+          },
+          { // else create a fallback
+            capabilities: [],
+            files: [],
+            success: function() {
+              document.body.innerHTML = '<p>This demo currently requires a standards compliant mobile browser.';
+              return;
+            },
+          },
+        ]);
+      }
+    });
+  };
+
+  window.addEventListener('load', function() {
+    fetch('/persons.json').then(function(resp) {
+      return resp.json()
+    }).then(function(personData) {
+      persons = personData;
+      initAwe();
+    })
+  });
+</script>
+</body>
+</html>
