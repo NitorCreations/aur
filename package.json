@@ -4,7 +4,8 @@
   "description": "Nitor Business Card Augmented Reality Demo",
   "main": "index.html",
   "dependencies": {
-    "three": "^0.74.0"
+    "three": "^0.74.0",
+    "awe.js": "git+https://github.com/awe-media/awe.js.git#master"
   },
   "devDependencies": {},
   "scripts": {
