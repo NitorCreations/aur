@@ -33,11 +33,11 @@ html,body {
 
 <script>
 
-window.start = (model, deviceId) => {
+window.start = (model, videoParams) => {
   ARController.getUserMediaThreeScene({
-    maxARVideoSize: 320,
-    cameraParam: 'Data/camera_para-iPhone 5 rear 640x480 1.0m.dat',
-    deviceId: deviceId,
+    maxARVideoSize: 640,
+    cameraParam: 'Data/camera_para.dat',
+    deviceId: videoParams.deviceId,
   onSuccess: function(arScene, arController, arCamera) {
 
     document.body.className = arController.orientation;
@@ -116,16 +116,13 @@ window.onload = () => {
     (geometry, materials) => {
       var object = new THREE.Mesh( geometry, pasi_material );
 
-      // navigator.mediaDevices.enumerateDevices()
-      //   .then(devices => {
-      //     const cameras = devices.filter(device => device.kind === 'videoinput')
-      //     const backCamera = cameras.find(camera => camera.label.indexOf('back') > -1)
-      //     const deviceId = backCamera ? backCamera.deviceId : cameras[0].deviceId
+      navigator.mediaDevices.enumerateDevices()
+        .then(devices => {
+          const backCamera = devices.find(camera => camera.label.indexOf('back') > -1)
+          const videoparams = {deviceId: backCamera ? {exact: backCamera.deviceId} : undefined}
 
-      //     window.start(deviceId)
-      //   })
-
-      window.start(object);
+          window.start(object, videoparams)
+        })
     }
   );
 }

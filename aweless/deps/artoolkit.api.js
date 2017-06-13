@@ -1064,6 +1064,7 @@
 				height : number | {min: number, ideal: number, max: number},
 
 				facingMode : 'environment' | 'user' | 'left' | 'right' | { exact: 'environment' | ... }
+				deviceId : string | {exact: 'string'}
 			}
 
 		See https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia for more information about the
@@ -1144,6 +1145,7 @@
 		}
 
 		mediaDevicesConstraints.facingMode = facing;
+		mediaDevicesConstraints.deviceId = configuration.deviceId;
 
 		navigator.getUserMedia  = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
 		var hdConstraints = {
@@ -1153,42 +1155,15 @@
 		  	}
 		};
 
-		if ( false ) {
-		// if ( navigator.mediaDevices || window.MediaStreamTrack) {
-			if (navigator.mediaDevices) {
-				navigator.mediaDevices.getUserMedia({
-					audio: false,
-					video: mediaDevicesConstraints
-				}).then(success, onError); 
-			} else {
-				MediaStreamTrack.getSources(function(sources) {
-					var facingDir = mediaDevicesConstraints.facingMode;
-					if (facing && facing.exact) {
-						facingDir = facing.exact;
-					}
-					for (var i=0; i<sources.length; i++) {
-						if (sources[i].kind === 'video' && sources[i].facing === facingDir) {
-							hdConstraints.video.mandatory.sourceId = sources[i].id;
-							break;
-						}
-					}
-					if (facing && facing.exact && !hdConstraints.video.mandatory.sourceId) {
-						onError('Failed to get camera facing the wanted direction');
-					} else {
-						if (navigator.getUserMedia) {
-							navigator.getUserMedia(hdConstraints, success, onError);
-						} else {
-							onError('navigator.getUserMedia is not supported on your browser');
-						}
-					}
-				});
-			}
+		if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+			navigator.mediaDevices.getUserMedia({
+				audio: false,
+				video: mediaDevicesConstraints
+			}).then(success, onError);
+		} else if (navigator.getUserMedia) {
+			navigator.getUserMedia(hdConstraints, success, onError);
 		} else {
-			if (navigator.getUserMedia) {
-				navigator.getUserMedia(hdConstraints, success, onError);
-			} else {
-				onError('navigator.getUserMedia is not supported on your browser');
-			}
+			onError('navigator.getUserMedia is not supported on your browser');
 		}
 
 		return video;
