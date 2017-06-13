@@ -73,7 +73,7 @@ window.start = (model, videoParams) => {
       model.material.shading = THREE.FlatShading;
     }
 
-    model.position.z = 0.5;
+    model.position.z = 1;
     markerRoot.add(model);
 
     arScene.scene.add(markerRoot);
@@ -89,9 +89,12 @@ window.start = (model, videoParams) => {
     var tick = () => {
       arScene.process();
       arScene.renderOn(renderer);
-      rotationV += (rotationTarget - model.rotation.z) * 0.05;
-      model.rotation.z += rotationV;
-      rotationV *= 0.8;
+
+      if (rotationTarget > 0) {
+        rotationV += (rotationTarget - model.rotation.z) * 0.05;
+        model.rotation.z += rotationV;
+        rotationV *= 0.8;
+      }
 
       requestAnimationFrame(tick);
     };
