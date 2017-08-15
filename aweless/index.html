@@ -15,7 +15,8 @@ html,body {
   transform: rotate(-90deg) translateX(-100%);
 }
 .desktop canvas {
-  transform: scale(-1, 1);
+  /* this mirrors the image */
+  /* transform: scale(-1, 1); */
 }
 </style>
 </head>
@@ -26,6 +27,7 @@ html,body {
 <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
 -->
 
+<script src="/utils.js"></script>
 <script src="./deps/artoolkit.debug.js"></script>
 <script src="./deps/artoolkit.api.js"></script>
 <script async src="./deps/three.min.js"></script>
@@ -33,15 +35,20 @@ html,body {
 
 <script>
 
-window.start = (model, videoParams) => {
+var person, persons;
+
+window.start = (person, videoParams) => {
   ARController.getUserMediaThreeScene({
     maxARVideoSize: 640,
     cameraParam: 'data/camera_para.dat',
     deviceId: videoParams.deviceId,
   onSuccess: function(arScene, arController, arCamera) {
+    const clickMap = {}
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
 
+    arScene.camera.isPerspectiveCamera = true
     document.body.className = arController.orientation;
-
     arController.setPatternDetectionMode(artoolkit.AR_MATRIX_CODE_DETECTION);
 
     var renderer = new THREE.WebGLRenderer({antialias: true});
@@ -64,70 +71,155 @@ window.start = (model, videoParams) => {
     // See /doc/patterns/Matrix code 3x3 (72dpi)/20.png
     var markerRoot = arController.createThreeBarcodeMarker(20);
 
-    if (!model) {
+    if (!person.model) {
       console.log('using debug model')
-      model = new THREE.Mesh(
+      person.model = new THREE.Mesh(
         new THREE.SphereGeometry(0.5, 8, 8),
         new THREE.MeshNormalMaterial()
       );
-      model.material.shading = THREE.FlatShading;
+      person.model.material.shading = THREE.FlatShading;
     }
 
-    model.position.z = 1;
-    markerRoot.add(model);
+    var zoomTarget = 1; // how far is the zoom
+    var zoomFactor = 0; // how quick is the animation
+
+    // zoom in/out on the model
+    clickMap[person.model.uuid] = () => {
+      zoomTarget = person.zoomed ? 1 : 2
+      zoomFactor = person.zoomed ? -0.1 : 0.1
+      person.zoomed = !person.zoomed
+    }
+    person.model.position.z = 1;
+    markerRoot.add(person.model);
+
+    if (person.twitter) {
+      makeCube({
+        path: '/twitter.png',
+        y: 0.5
+      }).then(twitter => {
+        clickMap[twitter.uuid] = () => {
+          window.open(`https://twitter.com/${person.twitter}`)
+        }
+        markerRoot.add(twitter)
+      })
+    }
+
+    if (person.linkedIn) {
+      makeCube({
+        path: '/linkedIn.png',
+        y: -0.5
+      }).then(linkedIn => {
+        clickMap[linkedIn.uuid] = () => window.open(person.linkedIn)
+        markerRoot.add(linkedIn)
+      })
+    }
 
     arScene.scene.add(markerRoot);
 
-    var rotationV = 0;
-    var rotationTarget = 0;
-
     renderer.domElement.addEventListener('click', ev => {
       ev.preventDefault();
-      rotationTarget += 1;
+
+      mouse.x = ( ev.clientX / renderer.domElement.clientWidth ) * 2 - 1;
+      mouse.y = -( ev.clientY / renderer.domElement.clientHeight ) * 2 + 1;
+
+      raycaster.setFromCamera( mouse, arScene.camera );
+      var intersects = raycaster.intersectObjects( arScene.scene.children, true );
+
+      intersects.forEach(intersect => {
+        const click = clickMap[intersect.object.uuid] || utils.noop
+        click(intersect)
+      })
     }, false);
 
-    var tick = () => {
+    const applyAnimations = () => {
+      const roundedScale = Math.round( person.model.scale.x * 10 ) / 10;
+      if (roundedScale !== zoomTarget) {
+        person.model.scale.set(
+          person.model.scale.x += zoomFactor,
+          person.model.scale.y += zoomFactor,
+          person.model.scale.z += zoomFactor
+        )
+      }
+    }
+
+    const tick = () => {
       arScene.process();
       arScene.renderOn(renderer);
-
-      if (rotationTarget > 0) {
-        rotationV += (rotationTarget - model.rotation.z) * 0.05;
-        model.rotation.z += rotationV;
-        rotationV *= 0.8;
-      }
-
+      applyAnimations();
       requestAnimationFrame(tick);
     };
 
     tick();
-
   }});
 };
 
-window.onload = () => {
-  var pasi_material;
+fetch('/persons.json')
+  .then(resp => resp.json())
+  .then(resp => {
+    persons = resp
+    person = persons[utils.getParameterByName('p')] || { image: '/nitor.png' }
 
-  var textureloader = new THREE.TextureLoader();
-  textureloader.load(
-    '../models/pasi_texture.jpg',
-    texture => pasi_material = new THREE.MeshBasicMaterial({ map: texture })
-  );
+    const material$ = loadTexture(person.texture || person.image)
+    const geometry$ = person.mesh ? loadGeometry(person.mesh) : makePlane()
+    const videoParams$ = getVideoParams()
 
-  var jsonloader = new window.THREE.JSONLoader();
-  jsonloader.load(
-    '../models/pasi_mesh.js',
-    (geometry, materials) => {
-      var object = new THREE.Mesh( geometry, pasi_material );
+    Promise.all([ material$, geometry$, videoParams$ ])
+      .then(([ material, geometry, videoParams ]) => {
+        person.model = new THREE.Mesh( geometry, material );
+        window.start(person, videoParams)
+      })
+  })
 
-      navigator.mediaDevices.enumerateDevices()
-        .then(devices => {
-          const backCamera = devices.find(camera => camera.label.indexOf('back') > -1)
-          const videoparams = {deviceId: backCamera ? {exact: backCamera.deviceId} : undefined}
+function loadTexture(path) {
+  return new Promise((resolve, reject) => {
+    var loader = new THREE.TextureLoader();
+    loader.load(path, texture => {
+      resolve(new THREE.MeshBasicMaterial({ map: texture }))
+    })
+  })
+}
 
-          window.start(object, videoparams)
-        })
-    }
-  );
+function loadGeometry(path) {
+  return new Promise((resolve, reject) => {
+    var loader = new THREE.JSONLoader();
+    loader.load(path, resolve)
+  })
+}
+
+function getVideoParams() {
+  return navigator.mediaDevices.enumerateDevices()
+    .then(devices => {
+      const backCamera = devices.find(camera => camera.label.indexOf('back') > -1)
+      return { deviceId: backCamera ? {exact: backCamera.deviceId} : undefined }
+    })
+}
+
+function makePlane(width = 1, height = 1) {
+  const plane = new THREE.PlaneGeometry( width, height, 160, 160 );
+  return Promise.resolve(plane)
+}
+
+function makeCube(options) {
+  const opts = Object.assign({
+    width: 0.5,
+    height: 0.5,
+    depth: 0.5,
+    x: 1,
+    y: 1,
+    z: 0.5
+  }, options)
+
+  return loadTexture(opts.path).then(material => {
+    const cube = new THREE.Mesh(
+      new THREE.CubeGeometry( opts.width, opts.height, opts.depth ),
+      material
+    );
+    cube.position.x = opts.x;
+    cube.position.y = opts.y;
+    cube.position.z = opts.z;
+
+    return cube;
+  })
 }
 
 </script>
