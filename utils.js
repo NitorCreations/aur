@@ -24,3 +24,5 @@ utils.debounce = function debounce(func, wait, immediate) {
 };
 
 utils.noop = () => {}
+
+utils.getHash = () => window.location.hash.substring(1, 51)

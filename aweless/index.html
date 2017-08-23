@@ -39,7 +39,7 @@ html,body {
 
 <script>
 
-var person, persons, font;
+var person, persons, hashPersonName, font;
 
 window.start = (person, videoParams) => {
   ARController.getUserMediaThreeScene({
@@ -162,11 +162,23 @@ window.start = (person, videoParams) => {
   }});
 };
 
+if (window.location.hash) {
+  const hashFile = `/${utils.getHash()}.txt`
+  fetch(hashFile)
+    .then(resp => resp.status === 200 && resp.text())
+    .then(resp => hashPersonName = resp && resp.trim())
+}
+
 fetch('/persons.json')
   .then(resp => resp.json())
   .then(resp => {
     persons = resp
     person = persons[utils.getParameterByName('p')] || { image: '/nitor.png' }
+
+    if (hashPersonName && person.name === hashPersonName) {
+      person.hash = utils.getHash()
+      localStorage.setItem(person.hash, person.name)
+    }
 
     const material$ = loadTexture(person.texture || person.image)
     const geometry$ = person.mesh ? loadGeometry(person.mesh) : makePlane()
