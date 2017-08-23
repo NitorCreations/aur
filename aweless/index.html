@@ -1,6 +1,6 @@
 <html>
 <head>
-<title>AR Marker example with Three.js</title>
+<title>Nitor Business Card Augmented Reality Demo</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1">
 <style>
 html,body {
@@ -39,7 +39,7 @@ html,body {
 
 <script>
 
-var person, persons;
+var person, persons, font;
 
 window.start = (person, videoParams) => {
   ARController.getUserMediaThreeScene({
@@ -119,6 +119,10 @@ window.start = (person, videoParams) => {
       })
     }
 
+    const nameMesh = makeText(person.name)
+    nameMesh.position.set( -1, -1.5, 1 );
+    markerRoot.add(nameMesh);
+
     arScene.scene.add(markerRoot);
 
     renderer.domElement.addEventListener('click', ev => {
@@ -168,6 +172,9 @@ fetch('/persons.json')
     const geometry$ = person.mesh ? loadGeometry(person.mesh) : makePlane()
     const videoParams$ = getVideoParams()
 
+    loadFont('/helvetiker_regular.typeface.json')
+      .then(resp => font = resp)
+
     Promise.all([ material$, geometry$, videoParams$ ])
       .then(([ material, geometry, videoParams ]) => {
         person.model = new THREE.Mesh( geometry, material );
@@ -199,8 +206,29 @@ function getVideoParams() {
     })
 }
 
+function loadFont(path) {
+  return new Promise((resolve, reject) => {
+    new THREE.FontLoader().load(path, resolve)
+  })
+}
+
+function makeText(text) {
+  const opts = {
+    font: font,
+    size: 0.25,
+    height: 0,
+    curveSegments: 1,
+    bevelEnabled: false
+  }
+
+  return new THREE.Mesh(
+    new THREE.TextGeometry(text, opts),
+    new THREE.MeshPhongMaterial({ color: 0x000000 })
+  );
+}
+
 function makePlane(width = 1, height = 1) {
-  const plane = new THREE.PlaneGeometry( width, height, 160, 160 );
+  const plane = new THREE.PlaneGeometry( width, height, 160, 160 )
   return Promise.resolve(plane)
 }
 

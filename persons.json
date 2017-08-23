@@ -1,5 +1,6 @@
 {
   "pasi": {
+    "name": "Pasi Niemi",
     "twitter":  "psiniemi",
     "linkedIn": "https://fi.linkedin.com/in/psiniemi",
     "mesh":     "/models/pasi_mesh.js",
@@ -8,10 +9,12 @@
     "image":    "/models/pasi.jpg"
   },
   "lasse": {
+    "name": "Lasse Lilja",
     "linkedIn": "https://fi.linkedin.com/pub/lasse-lilja/0/36/319",
     "image":    "/models/lasse.jpg"
   },
   "eki": {
+    "name": "Erkki Pulliainen",
     "linkedIn": "https://fi.linkedin.com/in/epulliai",
     "image":    "/models/eki.jpg"
   }
