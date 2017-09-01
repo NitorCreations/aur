@@ -26,3 +26,28 @@ utils.debounce = function debounce(func, wait, immediate) {
 utils.noop = () => {}
 
 utils.getHash = () => window.location.hash.substring(1, 51)
+
+utils.loadTexture = path => {
+  return new Promise((resolve, reject) => {
+    new THREE.TextureLoader().load(path, texture => {
+      const material = new THREE.MeshBasicMaterial({ map: texture })
+      resolve(material)
+    })
+  })
+}
+
+utils.loadGeometry = path => {
+  return new Promise(resolve => new THREE.JSONLoader().load(path, resolve))
+}
+
+utils.getVideoParams = () => {
+  return navigator.mediaDevices.enumerateDevices()
+    .then(devices => {
+      const backCamera = devices.find(camera => camera.label.indexOf('back') > -1)
+      return { deviceId: backCamera ? {exact: backCamera.deviceId} : undefined }
+    })
+}
+
+utils.loadFont = path => {
+  return new Promise(resolve => new THREE.FontLoader().load(path, resolve))
+}

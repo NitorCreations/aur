@@ -102,9 +102,7 @@ window.start = (person, videoParams) => {
         path: '/twitter.png',
         y: 0.5
       }).then(twitter => {
-        clickMap[twitter.uuid] = () => {
-          window.open(`https://twitter.com/${person.twitter}`)
-        }
+        clickMap[twitter.uuid] = () => window.open(`https://twitter.com/${person.twitter}`)
         markerRoot.add(twitter)
       })
     }
@@ -180,11 +178,11 @@ fetch('/persons.json')
       localStorage.setItem(person.hash, person.name)
     }
 
-    const material$ = loadTexture(person.texture || person.image)
-    const geometry$ = person.mesh ? loadGeometry(person.mesh) : makePlane()
-    const videoParams$ = getVideoParams()
+    const material$ = utils.loadTexture(person.texture || person.image)
+    const geometry$ = person.mesh ? utils.loadGeometry(person.mesh) : makePlane()
+    const videoParams$ = utils.getVideoParams()
 
-    loadFont('/helvetiker_regular.typeface.json')
+    utils.loadFont('/helvetiker_regular.typeface.json')
       .then(resp => font = resp)
 
     Promise.all([ material$, geometry$, videoParams$ ])
@@ -193,36 +191,6 @@ fetch('/persons.json')
         window.start(person, videoParams)
       })
   })
-
-function loadTexture(path) {
-  return new Promise((resolve, reject) => {
-    var loader = new THREE.TextureLoader();
-    loader.load(path, texture => {
-      resolve(new THREE.MeshBasicMaterial({ map: texture }))
-    })
-  })
-}
-
-function loadGeometry(path) {
-  return new Promise((resolve, reject) => {
-    var loader = new THREE.JSONLoader();
-    loader.load(path, resolve)
-  })
-}
-
-function getVideoParams() {
-  return navigator.mediaDevices.enumerateDevices()
-    .then(devices => {
-      const backCamera = devices.find(camera => camera.label.indexOf('back') > -1)
-      return { deviceId: backCamera ? {exact: backCamera.deviceId} : undefined }
-    })
-}
-
-function loadFont(path) {
-  return new Promise((resolve, reject) => {
-    new THREE.FontLoader().load(path, resolve)
-  })
-}
 
 function makeText(text) {
   const opts = {
@@ -254,7 +222,7 @@ function makeCube(options) {
     z: 0.5
   }, options)
 
-  return loadTexture(opts.path).then(material => {
+  return utils.loadTexture(opts.path).then(material => {
     const cube = new THREE.Mesh(
       new THREE.CubeGeometry( opts.width, opts.height, opts.depth ),
       material
