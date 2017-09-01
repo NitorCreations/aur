@@ -41,123 +41,184 @@ html,body {
 
 var person, persons, hashPersonName, font;
 
-window.start = (person, videoParams) => {
-  ARController.getUserMediaThreeScene({
-    width: window.innerWidth,
-    height: window.innerHeight,
-    cameraParam: 'data/camera_para.dat',
-    deviceId: videoParams.deviceId,
-  onSuccess: function(arScene, arController, arCamera) {
-    const clickMap = {}
-    const raycaster = new THREE.Raycaster();
-    const mouse = new THREE.Vector2();
+function createARController(deviceId) {
+  return new Promise(resolve => {
+    ARController.getUserMediaThreeScene({
+      width: window.innerWidth,
+      height: window.innerHeight,
+      cameraParam: 'data/camera_para.dat',
+      deviceId: deviceId,
+      onSuccess: (arScene, arController, arCamera) => {
+        arScene.camera.isPerspectiveCamera = true
+        document.body.className = arController.orientation;
+        arController.setPatternDetectionMode(artoolkit.AR_MATRIX_CODE_DETECTION);
 
-    arScene.camera.isPerspectiveCamera = true
-    document.body.className = arController.orientation;
-    arController.setPatternDetectionMode(artoolkit.AR_MATRIX_CODE_DETECTION);
+        const renderer = new THREE.WebGLRenderer({antialias: true});
+        if (arController.orientation === 'portrait') {
+          const w = (window.innerWidth / arController.videoHeight) * arController.videoWidth;
+          const h = window.innerWidth;
+          renderer.setSize(w, h);
+          renderer.domElement.style.paddingBottom = (w-h) + 'px';
+        } else {
+          if (/Android|mobile|iPad|iPhone/i.test(navigator.userAgent)) {
+            renderer.setSize(window.innerWidth, (window.innerWidth / arController.videoWidth) * arController.videoHeight);
+          } else {
+            renderer.setSize(arController.videoWidth, arController.videoHeight);
+            document.body.className += ' desktop';
+          }
+        }
 
-    var renderer = new THREE.WebGLRenderer({antialias: true});
-    if (arController.orientation === 'portrait') {
-      var w = (window.innerWidth / arController.videoHeight) * arController.videoWidth;
-      var h = window.innerWidth;
-      renderer.setSize(w, h);
-      renderer.domElement.style.paddingBottom = (w-h) + 'px';
-    } else {
-      if (/Android|mobile|iPad|iPhone/i.test(navigator.userAgent)) {
-        renderer.setSize(window.innerWidth, (window.innerWidth / arController.videoWidth) * arController.videoHeight);
-      } else {
-        renderer.setSize(arController.videoWidth, arController.videoHeight);
-        document.body.className += ' desktop';
+        document.body.insertBefore(renderer.domElement, document.body.firstChild);
+
+        resolve({
+          arController,
+          arScene,
+          renderer,
+        })
       }
-    }
+    })
+  })
+}
 
-    document.body.insertBefore(renderer.domElement, document.body.firstChild);
+/**
+ * TODO: createMarker needs to reload person's meta and create new geometries when we detect different marker ID
+ */
 
-    // See /doc/patterns/Matrix code 3x3 (72dpi)/20.png
-    var markerRoot = arController.createThreeBarcodeMarker(20);
+function createMarker(ctrl, person, markerId) {
+  const markerRoot = ctrl.arController.createThreeBarcodeMarker(markerId);
+  const clickMap = {}
+  const raycaster = new THREE.Raycaster();
+  const mouse = new THREE.Vector2();
 
-    if (!person.model) {
-      console.log('using debug model')
-      person.model = new THREE.Mesh(
-        new THREE.SphereGeometry(0.5, 8, 8),
-        new THREE.MeshNormalMaterial()
-      );
-      person.model.material.shading = THREE.FlatShading;
-    }
+  if (!person.model) {
+    console.log('using debug model')
+    person.model = new THREE.Mesh(
+      new THREE.SphereGeometry(0.5, 8, 8),
+      new THREE.MeshNormalMaterial()
+    );
+    person.model.material.shading = THREE.FlatShading;
+  }
 
-    var zoomTarget = 1; // how far is the zoom
-    var zoomFactor = 0; // how quick is the animation
+  var zoomTarget = 1; // how far is the zoom
+  var zoomFactor = 0; // how quick is the animation
 
-    // zoom in/out on the model
-    clickMap[person.model.uuid] = () => {
-      zoomTarget = person.zoomed ? 1 : 2
-      zoomFactor = person.zoomed ? -0.1 : 0.1
-      person.zoomed = !person.zoomed
-    }
-    person.model.position.z = 1;
-    markerRoot.add(person.model);
+  // zoom in/out on the model
+  clickMap[person.model.uuid] = () => {
+    zoomTarget = person.zoomed ? 1 : 2
+    zoomFactor = person.zoomed ? -0.1 : 0.1
+    person.zoomed = !person.zoomed
+  }
+  person.model.position.z = 1;
+  markerRoot.add(person.model);
 
-    if (person.twitter) {
-      makeCube({
-        path: '/twitter.png',
-        y: 0.5
-      }).then(twitter => {
-        clickMap[twitter.uuid] = () => window.open(`https://twitter.com/${person.twitter}`)
-        markerRoot.add(twitter)
-      })
-    }
+  if (person.twitter) {
+    makeCube({
+      path: '/twitter.png',
+      y: 0.5
+    }).then(twitter => {
+      clickMap[twitter.uuid] = () => window.open(`https://twitter.com/${person.twitter}`)
+      markerRoot.add(twitter)
+    })
+  }
 
-    if (person.linkedIn) {
-      makeCube({
-        path: '/linkedIn.png',
-        y: -0.5
-      }).then(linkedIn => {
-        clickMap[linkedIn.uuid] = () => window.open(person.linkedIn)
-        markerRoot.add(linkedIn)
-      })
-    }
+  if (person.linkedIn) {
+    makeCube({
+      path: '/linkedIn.png',
+      y: -0.5
+    }).then(linkedIn => {
+      clickMap[linkedIn.uuid] = () => window.open(person.linkedIn)
+      markerRoot.add(linkedIn)
+    })
+  }
 
-    const nameMesh = makeText(person.name)
-    nameMesh.position.set( -1, -1.5, 1 );
-    markerRoot.add(nameMesh);
+  const nameMesh = makeText(person.name)
+  nameMesh.position.set( -1, -1.5, 1 );
+  markerRoot.add(nameMesh);
 
-    arScene.scene.add(markerRoot);
+  const onClick = event => {
+    event.preventDefault();
 
-    renderer.domElement.addEventListener('click', ev => {
-      ev.preventDefault();
+    const { clientHeight, clientWidth } = ctrl.renderer.domElement
+    const { clientX, clientY } = event
 
-      mouse.x = ( ev.clientX / renderer.domElement.clientWidth ) * 2 - 1;
-      mouse.y = -( ev.clientY / renderer.domElement.clientHeight ) * 2 + 1;
+    mouse.x = ( clientX / clientWidth ) * 2 - 1;
+    mouse.y = -( clientY / clientHeight ) * 2 + 1;
 
-      raycaster.setFromCamera( mouse, arScene.camera );
-      var intersects = raycaster.intersectObjects( arScene.scene.children, true );
-
-      intersects.forEach(intersect => {
+    raycaster.setFromCamera( mouse, ctrl.arScene.camera );
+    raycaster.intersectObjects( ctrl.arScene.scene.children, true )
+      .forEach(intersect => {
         const click = clickMap[intersect.object.uuid] || utils.noop
         click(intersect)
       })
-    }, false);
+  }
 
-    const applyAnimations = () => {
-      const roundedScale = Math.round( person.model.scale.x * 10 ) / 10;
-      if (roundedScale !== zoomTarget) {
-        person.model.scale.set(
-          person.model.scale.x += zoomFactor,
-          person.model.scale.y += zoomFactor,
-          person.model.scale.z += zoomFactor
+  ctrl.renderer.domElement.addEventListener('click', onClick, false);
+
+  const animate = () => {
+    const roundedScale = Math.round( person.model.scale.x * 10 ) / 10;
+    if (roundedScale !== zoomTarget) {
+      person.model.scale.set(
+        person.model.scale.x += zoomFactor,
+        person.model.scale.y += zoomFactor,
+        person.model.scale.z += zoomFactor
+      )
+    }
+  }
+
+  const destroy = () => {
+    ctrl.arScene.scene.remove(markerRoot);
+    ctrl.renderer.domElement.removeEventListener('click', onClick);
+  }
+
+  return {
+    markerRoot
+    destroy,
+    animate,
+  }
+}
+
+window.start = (person, videoParams) => {
+  createARController(videoParams.deviceId)
+    .then(ctrl => {
+      let activeMarkerId = null
+      let marker = {
+        animate: utils.noop,
+        destroy: utils.noop
+      }
+
+      const listener = ev => {
+        const { idMatrix } = ev.data.marker
+        if (idMatrix > -1 && idMatrix !== activeMarkerId) {
+          console.log('new marker detected')
+          activeMarkerId = idMatrix
+
+          // destroy the old one
+          marker.destroy()
+
+          // make new marker and track it
+          marker = createMarker(ctrl, person, activeMarkerId)
+          ctrl.arScene.scene.add(marker.markerRoot);
+        }
+
+        ctrl.arController.removeEventListener('getMarker', listener)
+        // sample the event just about every 200ms
+        setTimeout(
+          () => ctrl.arController.addEventListener('getMarker', listener),
+          200
         )
       }
-    }
 
-    const tick = () => {
-      arScene.process();
-      arScene.renderOn(renderer);
-      applyAnimations();
-      requestAnimationFrame(tick);
-    };
+      ctrl.arController.addEventListener('getMarker', listener)
 
-    tick();
-  }});
+      const tick = () => {
+        ctrl.arScene.process();
+        ctrl.arScene.renderOn(ctrl.renderer);
+        marker.animate();
+        requestAnimationFrame(tick);
+      };
+
+      tick();
+  });
 };
 
 if (window.location.hash) {
